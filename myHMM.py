@@ -18,12 +18,17 @@ class myHMM(object):
         
         alpha = np.zeros((N,T))
         alpha[:,0] = pi*b[:,o[0]]
- 
+
+        st = 0
+        s = np.zeros(T+1)
         for t in xrange(1,T):
+            alpha[:,t] = alpha[:,t-1] * a * b[:,o[t]] 
             for i in xrange(N):
-                """
-                TODO: Do something to update alpha[i,t]
-                """
+
+                s[t] = s[t] + alpha[i,t]
+            st = st + s[t]
+            alpha[:,t-1] = (1./st) * alpha[:,t-1]
+   
         return alpha 
 
     def HMMbwd(self, a, b, o):
@@ -34,11 +39,13 @@ class myHMM(object):
         c = np.ones((T))
         beta[:,T-1] = c[T-1]
     
+        st = 0
         for t in xrange(T-2,-1,-1):
+            beta[:,t] = a * b[:,t] * b[:,t+1]
             for i in xrange(N):
-                """
-                TODO: Do something to update beta[i,t]
-                """
+
+            st = st + s[t+1]
+            beta[:,t+1] = (1./st) * beta[:,t+1]
         return beta
 
     def HMMViterbi(self, a, b, o, pi):
@@ -54,6 +61,24 @@ class myHMM(object):
         """
         TODO: implement the viterbi algorithm and return path
         """
+        for i in xrange(N):
+            delta[i,0] = pi[i] * b[i,o[0]]
+            phi[i,0] = 0
+        for t in xrange(T-1,1,1):
+            for i in xrange(N):
+                for k in xrange(N):  
+                    if delta[i,t] < delta[k,t-1] *　a[k,i] *　b[i,o[t]] :
+                        delta[i,t] = delta[k,t-1] *　a[k,i] *　b[i,o[t]]
+                        phi[i,t] = k
+        z = np.zeros(T)
+        for k in xrange(N):
+            if m < delta[k,T-1] :
+                m = delta[k,T-1]
+                z[T-1] = s[k]
+        path[T-1] = s[z[T-1]]
+        for i in xrange(T-1,-1,1):
+            z[i-1] = phi[z[i],i]
+            path[i-1] = s[z[i-1]]
         return path 
 
  
