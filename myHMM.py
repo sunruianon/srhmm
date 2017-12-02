@@ -60,7 +60,7 @@ class myHMM(object):
     def HMMBaumWelch(self, o, N, dirichlet=False, verbose=False, rand_seed=1):
           
         
-        T = np.shape(o)[0]
+        T = np.shape(o)[0]  # the first dimension of array o 
 
         M = int(max(o))+1  
 
