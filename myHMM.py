@@ -6,6 +6,7 @@ import sys
 if sys.version_info.major == 3:
     xrange = range
 
+global s
 
 class myHMM(object):
     def __init__(self, tolerance = 1e-6, max_iterations=10000):
@@ -19,16 +20,17 @@ class myHMM(object):
         alpha = np.zeros((N,T))
         alpha[:,0] = pi*b[:,o[0]]
 
-        st = 0
+        st = 1
         s = np.zeros(T)
         for i in xrange(N):
             s[0] = s[0] + alpha[i,0]
         for t in xrange(1,T):
-            alpha[:,t] = alpha[:,t-1] * a * b[:,o[t]] 
+            c = np.diag(b[:,o[t]])
+            alpha[:,t] = alpha[:,t-1] .dot(a) .dot(c)
             for i in xrange(N):
                 s[t] = s[t] + alpha[i,t]
         for t in xrange(T):
-            st = st + s[t]
+            st = st * s[t]
             alpha[:,t] = (1./st) * alpha[:,t]
    
         return alpha 
@@ -41,12 +43,12 @@ class myHMM(object):
         c = np.ones((T))
         beta[:,T-1] = c[T-1]
     
-        st = 0
-        for t in xrange(T-2,-1,-1):
-            beta[:,t] = a * b[:,t] * beta[:,t+1]
-            for i in xrange(N):
-            st = st + s[t+1]
-            beta[:,t+1] = (1./st) * beta[:,t+1]
+        st = 1
+        for t in xrange(T-2,0,-1):
+            d = np.diag(b[:,o[t+1]])
+            beta[:,t] = a .dot(d) .dot(beta[:,t+1])
+            st = st * s[t+1]
+            beta[:,t] = (1./st) * beta[:,t]
 
         return beta
 
