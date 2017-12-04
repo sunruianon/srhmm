@@ -21,6 +21,7 @@ class myHMM(object):
         alpha[:,0] = pi*b[:,o[0]]
 
         st = 1
+        global s 
         s = np.zeros(T)
         for i in xrange(N):
             s[0] = s[0] + alpha[i,0]
@@ -65,25 +66,26 @@ class myHMM(object):
         """
         TODO: implement the viterbi algorithm and return path
         """
+        global s
         for i in xrange(N):
             delta[i,0] = pi[i] * b[i,o[0]]
             phi[i,0] = 0
         for t in xrange(1,T):
             for i in xrange(N):
                 for k in xrange(N):  
-                    if delta[i,t] < delta[k,t-1] *　a[k,i] *　b[i,o[t]] :
-                        delta[i,t] = delta[k,t-1] *　a[k,i] *　b[i,o[t]]
+                    if delta[i,t] < (delta[k,t-1]*a[k,i]*b[i,o[t]]) :
+                        delta[i,t] = delta[k,t-1]*a[k,i]*b[i,o[t]]
                         phi[i,t] = k
         z = np.zeros(T)
         m = 0
         for k in xrange(N):
             if m < delta[k,T-1] :
                 m = delta[k,T-1]
-                z[T-1] = k
-        path[T-1] = s[z[T-1]]
+                path[T-1] = k
+
         for i in xrange(T-1,1,-1):
-            z[i-1] = phi[z[i],i]
-            path[i-1] = z[i-1]
+            path[i-1] = phi[int(path[i]),i]
+
         return path 
 
  
